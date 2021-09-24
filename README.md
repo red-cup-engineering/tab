@@ -1,1 +1,1 @@
-# Groundhog Autonomous Zone Computer System
+# Groundhog Autonomous Zone Operating System
