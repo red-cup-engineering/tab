@@ -6,6 +6,9 @@
         :model {}
         :util {}})
 ;;;; Utilities
+(lambda gos.util.collect-keys [tbl]
+  "Return a list of the keys in TBL."
+  (icollect [key _ (pairs tbl)] key))
 (lambda gos.util.load [path ?fallback]
   (let [load-file (io.open (.. path ".fnl") :r)]
     (if load-file
@@ -17,6 +20,18 @@
               (gos.util.load path))
             (print (.. "No file at " path
                        " and no fallback given. Failed to load."))))))
+(lambda gos.util.make-id [?existing]
+  "Generates an ID, dismissing it if its already in EXISTING."
+  (lambda f [x]
+    (var r (- (math.random 16) 1))
+    (set r (or (and (= x :x) (+ r 1)) (+ (% r 4) 9)))
+    (: :0123456789abcdef :sub r r))
+  (let [gen (: :xxxxxxxx :gsub "[xy]" f)]
+    (when ?existing
+      (each [_ id (pairs ?existing)]
+        (when (= gen id)
+          (gos.util.make-id ?existing))))
+    gen))
 (lambda gos.util.make-string-appender [?sep]
   "Return a function that holds a string and accepts one atctional argument (string or list of strings). If provided, the argument is appended to the held string, with SEP appended (to each one, if its a list of strings.)"
   (var o "")
@@ -119,6 +134,20 @@
           (lambda save-data [handler data ?file]
             (gos.util.save data (or ?file (. handler name-file)))))
     handler))
+(lambda gos.model.dictionary [?file-name ?name ?base]
+  (let [name (or ?name :dictionary)
+        file-name (or ?file-name name)
+        dictionary (gos.model.data
+                    file-name name
+                    (or ?base (gos.model.basic-thing))
+                    [])
+        I (gos.util.make-string-inserters name)]
+    (tset dictionary (I.I :submit- :-item)
+          (lambda submit-dictionary-item [dictionary id item]
+            (let [items (: dictionary (I.P :load-))]
+              (tset items id item)
+              (: dictionary (I.P :save-) items))))
+    dictionary))
 (lambda gos.model.dimension [?base]
   "Turns ?BASE (or a new basic thing) into a dimension, which is a timer and maker combined."
   (let [dimension (or ?base (gos.model.base))]
@@ -159,6 +188,28 @@
         (set thing.maker maker)
         thing))
     maker))
+(lambda gos.model.map [?file ?name ?base]
+  (let [name (or ?name :map)
+        base (or ?base (gos.model.basic))
+        f (or ?file name)
+        file (if (. base :folder)
+                 (.. base.folder "/" f)
+                 f)
+        map (gos.model.dictionary file name base)
+        I (gos.util.make-string-inserters name)]
+    (tset map (I.I :make- :-item)
+          (lambda make-map-item [map name]
+            {:name name}))
+    (tset map (I.I :submit- :-item)
+          (lambda submit-map-item [map entry]
+            (let [areas (: map (I.P :load-))
+                  area-keys (gos.util.collect-keys areas)
+                  area-id (gos.util.make-id area-keys)
+                  area {area-id entry}]
+              (tset areas area-id entry)
+              (: map (I.P :save-) areas)
+              area)))
+    map))
 (lambda gos.model.mud-client [server connection ?base]
   (let [client (or ?base (gos.model.basic-thing))]
     (client:set-attributes
@@ -281,9 +332,14 @@
 (lambda gos.computer.teraum []
   (let [teraum (gos.model.mud-server
                 nil
+                (gos.model.map
+                 nil nil
                 (gos.model.dimension
-                 (gos.model.basic-thing
-                  {:name :Teraum})))]
+                 (gos.model.folder
+                  :teraum
+                  (gos.model.basic-thing
+                   {:name :Teraum
+                    :spawn-room :d6cce35c})))))]
     teraum))
 ;;; dont delete this line
 gos
