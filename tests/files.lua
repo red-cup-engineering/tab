@@ -28,6 +28,9 @@ local ok, err = pcall(function()
   write(root .. "/nested/two.fnl", "{:value 2}")
   names(tab["scan-directory"](root .. "/empty"), {})
   names(tab["scan-directory"](root, false, "f"), {"one.fnl"})
+  names(tab["scan-directory"](root .. "/", false, "f"), {"one.fnl"})
+  names(tab["scan-directory"](root .. "//", false, "f"), {"one.fnl"})
+  assert(tab["load-folder"](root .. "/").one.value == 1)
   names(tab["scan-directory"](root, false, "d"), {"empty", "nested"})
   names(tab["scan-directory"](root, true, "f"), {"one.fnl", "nested/two.fnl"})
   names(tab["scan-directory"](root, false, "f", true), {"one"})
@@ -64,6 +67,21 @@ local ok, err = pcall(function()
   local missing = root .. "/missing"
   fails(function() tab["scan-directory"](missing) end, missing)
   fails(function() tab["load-folder"](missing) end, missing)
+
+  -- Root has no extra separator before its children.
+  local root_popen = io.popen
+  io.popen = function()
+    return {lines = function()
+      local paths, i = {"/", "/tmp"}, 0
+      return function() i = i + 1; return paths[i] end
+    end, close = function() return true, "exit", 0 end}
+  end
+  local root_ok, root_error = pcall(function()
+    names(tab["scan-directory"]("/"), {"tmp"})
+    names(tab["scan-directory"]("///"), {"tmp"})
+  end)
+  io.popen = root_popen
+  assert(root_ok, root_error)
 
   -- Starting the child can fail before there is a stream to read.
   local popen = io.popen

@@ -119,7 +119,11 @@
           "Directory scan type must be f or d")
   ;; Quote as a literal shell argument; prefix relative paths so find cannot
   ;; interpret a leading dash as an expression. Preserve the caller's path.
-  (local scan-path (if (= (string.sub path 1 1) "/") path (.. "./" path)))
+  (local normalized (: path :gsub "/+$" ""))
+  (local scan-path (if (= normalized "") "/"
+                      (= (string.sub normalized 1 1) "/") normalized
+                      (.. "./" normalized)))
+  (local relative-start (if (= scan-path "/") 2 (+ 2 (length scan-path))))
   (local quoted (: scan-path :gsub "'" "'\\''"))
   (local matches {})
   (local A (tab.make-string-appender))
@@ -128,7 +132,7 @@
   (when ?type (A [" -type " ?type]))
   (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))]
     (each [result _ (results:lines)]
-      (let [line (string.sub result (+ 2 (length scan-path)))]
+      (let [line (string.sub result relative-start)]
         (when (> (length line) 0)
           (table.insert matches (if ?strip-ext
                                     (: line :sub 0 -5)
