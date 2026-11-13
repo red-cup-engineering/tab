@@ -4,6 +4,8 @@
 
 
 LUA_VERSION=5.4.4
+LUA ?= lua
+
 
 tab-bin: tab.fnl socket.a mime.a lua-$(LUA_VERSION)/src/liblua.a
 	./fennel --compile-binary $< $@ \
@@ -45,6 +47,10 @@ socket.a: $(SOCKET_OBJS)
 mime.a: luasocket/src/mime.o luasocket/src/compat.o
 	ar rcs $@ $^
 
+# Verification uses Lua 5.4, the vendored Fennel compiler, and find.
+test:
+	$(LUA) tests/files.lua
+
 # misc
 
 clean:
@@ -52,4 +58,4 @@ clean:
 	make -C luasocket clean
 	make -C lua-$(LUA_VERSION) clean
 
-.PHONY: run clean
+.PHONY: run clean test

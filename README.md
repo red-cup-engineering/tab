@@ -109,3 +109,15 @@ graph TD
     vr/object --> vr/mobile
     vr/object --> vr/mud/client
 ```
+
+## Verification
+
+Run `make test` with Lua 5.4 and `find` available (`make test LUA=lua5.4`
+if the interpreter is version-named). Tests load the vendored Fennel compiler
+and actual TAB source, exercise filesystem scans and folder loading, and check
+that the MUD users handler cannot become ready after a failed scan.
+
+Directory scans raise an error if the child process cannot start or exits
+unsuccessfully. Empty results indicate a successful scan, not missing data.
+Callers that deliberately recover can use `pcall`; required-data loaders let
+the error propagate rather than treating unavailable data as an empty world.

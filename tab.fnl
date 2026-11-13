@@ -110,19 +110,20 @@
 ;;; Files
 
 (fn tab.scan-directory [path ?recurse ?type ?strip-ext]
-  "Return a list of files & directories at PATH, ?RECURSE-ing if true, limited to Files or Directories if F or D are given as the TYPE, and ?STRIP-EXT if true removes the file extension from the file names in the returned list."
+  "Return a list of files & directories at PATH, ?RECURSE-ing if true, limited to Files or Directories if F or D are given as the TYPE, and ?STRIP-EXT if true removes the file extension from the file names in the returned list. Raises an error if find cannot start or exits unsuccessfully; an empty list means a successful empty scan."
   (local matches {})
   (local A (tab.make-string-appender))
   (A ["find \"" path "\""])
   (when (not ?recurse) (A " -maxdepth 1"))
   (when ?type (A [" -type " ?type]))
-  (let [results (io.popen (A))]
+  (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))]
     (each [result _ (results:lines)]
       (let [line (string.sub result (+ 2 (length path)))]
         (when (> (length line) 0)
           (table.insert matches (if ?strip-ext
                                     (: line :sub 0 -5)
-                                    line))))))
+                                    line)))))
+    (assert (results:close) (.. "Could not scan directory: " path)))
   matches)
 
 (fn tab.save-file [data path ?force]
