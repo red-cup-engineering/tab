@@ -7,7 +7,7 @@
    (.. "<!doctype html>"
        "<html>"
        "<title>" (or ?title
-                     "MarMUD Web Document")
+                     "TAB Web Document")
        "</title>"
        "<body>%s</body></html>")
    content))

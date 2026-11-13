@@ -1,7 +1,0 @@
-#+title: TAB
-#+todo: SOMEDAY LATER SOON PLAN MAKE TEST DOC RELSE | DONE
-#+index: TAB
-#+index: Fennel!Fennel software!TAB
-#+index: MUD!MUD engine!TAB
-
-* Plans

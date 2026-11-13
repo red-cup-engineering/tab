@@ -8,13 +8,12 @@ This directory collects *models* organized into various categories:
 | Category       | Models are about...                 |
 |----------------|-------------------------------------|
 | GAZ            | GAZ as an organization              |
-| MarMUD         | The GAZ server                      |
 | MUD            | MUD servers & clients               |
-| Okaga          | A virtual starship                  |
 | Real           | Stuff in the "real world"           |
 | Lib(rary)      | Books, zines, references            |
 | Org(anization) | Projects, plans, groups             |
 | Sys(tem)       | Systems that interpret other models |
 | TAB            | TAB as a software/project           |
-| Teraum         | A virtual fantasy world             |
 | Web            | Web servers                         |
+
+World models built for TAB, such as Okaga and Teraum, live in their paracosms rather than in this catalog.

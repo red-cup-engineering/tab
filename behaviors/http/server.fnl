@@ -35,7 +35,7 @@
   (string.format
    (.. "<!doctype html>"
        "<html>"
-       "<title>MarMUD Web Document</title>"
+       "<title>TAB Web Document</title>"
        "<body>%s</body></html>")
    content))
 

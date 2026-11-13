@@ -62,11 +62,11 @@ Here's a play-by-play that *should* work if you follow it exactly. If it doesn't
   - Copy the text in the file at `~/.ssh/id_ed25519.pub` into the form at https://github.com/settings/ssh/new
 - We should be good to grab the TAB code from github now - assuming you've been added to the repository:
   - `cd ~`
-  - `git clone git@github.com:gaz561/tab.git`
+  - `git clone git@github.com:red-cup-engineering/tab.git`
   - Move into that folder: `cd tab`
   - Set up our dependencies
     - `make tab-bin`
-- You should be able to run a local copy of the MUD now with `make marmud`
+- Worlds for TAB live in their paracosms. To run one, go to its `worlds/<name>-tab` directory and run `make load TAB_ROOT=~/tab`
 
 
 We tend to use Emacs ourselves - check our Emacs guide for more info on that - but otherwise you might wanna use screen and nano or whatever - I hadn't realized before right now that there's a last-mile tech stack of actually running & changing the code, lol. One step at a time.
