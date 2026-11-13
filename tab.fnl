@@ -130,14 +130,20 @@
   (A ["find '" quoted "'"])
   (when (not ?recurse) (A " -maxdepth 1"))
   (when ?type (A [" -type " ?type]))
-  (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))]
-    (each [result _ (results:lines)]
+  (A " -print0")
+  (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))
+        output (results:read "*a")
+        closed (results:close)]
+    ;; Check both read and process completion before exposing any partial names.
+    (assert (and output closed) (.. "Could not scan directory: " path))
+    (assert (or (= output "") (= (string.sub output -1) "\0"))
+            (.. "Incomplete directory scan output: " path))
+    (each [result (string.gmatch output "(.-)%z")]
       (let [line (string.sub result relative-start)]
         (when (> (length line) 0)
           (table.insert matches (if ?strip-ext
                                     (: line :sub 0 -5)
-                                    line)))))
-    (assert (results:close) (.. "Could not scan directory: " path)))
+                                    line))))))
   matches)
 
 (fn tab.save-file [data path ?force]

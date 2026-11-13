@@ -125,8 +125,9 @@ the error propagate rather than treating unavailable data as an empty world.
 Scan paths are passed literally to `find`, including spaces, quotes, dollar
 signs and backticks. The optional type is limited to the documented `f` and
 `d` values; invalid types and empty/NUL-containing paths fail before starting
-a process. Scanning still uses newline-delimited `find` output: filenames
-containing newlines are not supported by this API.
+a process. Scanning uses NUL-delimited `find -print0` output, so embedded
+newlines remain filename data. A read failure, unsuccessful child exit or
+incomplete final record raises an error rather than returning partial names.
 
 ## Research notes
 

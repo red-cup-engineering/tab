@@ -74,15 +74,39 @@ local ok, err = pcall(function()
   fails(function() tab["scan-directory"](missing) end, missing)
   fails(function() tab["load-folder"](missing) end, missing)
 
+  -- Newlines are filename data, including in scan roots and model IDs.
+  local newline_root = root .. "/line\nbreak"
+  run("mkdir -p " .. quote(newline_root .. "/nested\ndir"))
+  write(newline_root .. "/one\ntwo.fnl", "{:value 8}")
+  write(newline_root .. "/nested\ndir/three\nfour.fnl", "{:value 9}")
+  names(tab["scan-directory"](newline_root, false, "f"), {"one\ntwo.fnl"})
+  names(tab["scan-directory"](newline_root .. "/", true, "f"),
+    {"one\ntwo.fnl", "nested\ndir/three\nfour.fnl"})
+  names(tab["scan-directory"](newline_root, false, "d"), {"nested\ndir"})
+  names(tab["scan-directory"](newline_root, false, "f", true), {"one\ntwo"})
+  local newline_data = tab["load-folder"](newline_root, true)
+  assert(newline_data["one\ntwo"].value == 8)
+  assert(newline_data["nested\ndir/three\nfour"].value == 9)
+
+  -- Even a successful process must not hide read errors or truncated framing.
+  local saved_popen = io.popen
+  for _, output in ipairs({false, root .. "/partial.fnl"}) do
+    local was_closed = false
+    io.popen = function()
+      return {read = function() return output or nil end,
+        close = function() was_closed = true; return true, "exit", 0 end}
+    end
+    local accepted = pcall(tab["scan-directory"], root)
+    io.popen = saved_popen
+    assert(not accepted and was_closed, "incomplete scan must close and fail")
+  end
+
   -- Root has no extra separator before its children.
   local root_popen = io.popen
   local root_ok, root_error = pcall(function()
     for _, prefix in ipairs({"/", "///"}) do
       io.popen = function()
-        return {lines = function()
-          local paths, i = {prefix, prefix .. "tmp"}, 0
-          return function() i = i + 1; return paths[i] end
-        end, close = function() return true, "exit", 0 end}
+        return {read = function() return prefix .. "\0" .. prefix .. "tmp\0" end, close = function() return true, "exit", 0 end}
       end
       names(tab["scan-directory"](prefix), {"tmp"})
     end
@@ -102,12 +126,7 @@ local ok, err = pcall(function()
   local closed = false
   io.popen = function()
     return {
-      lines = function()
-        local sent = false
-        return function()
-          if not sent then sent = true; return root .. "/one.fnl" end
-        end
-      end,
+      read = function() return root .. "/one.fnl\0" end,
       close = function() closed = true; return nil, "exit", 1 end
     }
   end
