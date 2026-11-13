@@ -121,3 +121,9 @@ Directory scans raise an error if the child process cannot start or exits
 unsuccessfully. Empty results indicate a successful scan, not missing data.
 Callers that deliberately recover can use `pcall`; required-data loaders let
 the error propagate rather than treating unavailable data as an empty world.
+
+Scan paths are passed literally to `find`, including spaces, quotes, dollar
+signs and backticks. The optional type is limited to the documented `f` and
+`d` values; invalid types and empty/NUL-containing paths fail before starting
+a process. Scanning still uses newline-delimited `find` output: filenames
+containing newlines are not supported by this API.

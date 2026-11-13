@@ -28,14 +28,67 @@ local ok, err = pcall(function()
   write(root .. "/nested/two.fnl", "{:value 2}")
   names(tab["scan-directory"](root .. "/empty"), {})
   names(tab["scan-directory"](root, false, "f"), {"one.fnl"})
+  names(tab["scan-directory"](root .. "/", false, "f"), {"one.fnl"})
+  names(tab["scan-directory"](root .. "//", false, "f"), {"one.fnl"})
+  assert(tab["load-folder"](root .. "/").one.value == 1)
   names(tab["scan-directory"](root, false, "d"), {"empty", "nested"})
   names(tab["scan-directory"](root, true, "f"), {"one.fnl", "nested/two.fnl"})
   names(tab["scan-directory"](root, false, "f", true), {"one"})
+  -- Shell syntax must remain literal filename data, never execute or expand.
+  for _, name in ipairs({"space directory", "quote'and\"double", "$HOME", "$(printf injected)", "`printf injected`", "semi;colon"}) do
+    local path = root .. "/" .. name
+    run("mkdir " .. quote(path))
+    write(path .. "/literal.fnl", "{:value 3}")
+    names(tab["scan-directory"](path, false, "f"), {"literal.fnl"})
+  end
+  local relative = "-scan-test-" .. root:gsub("/", "_")
+  run("mkdir " .. quote("./" .. relative))
+  local relative_ok, relative_error = pcall(function()
+    write(relative .. "/literal.fnl", "{:value 4}")
+    names(tab["scan-directory"](relative, false, "f"), {"literal.fnl"})
+  end)
+  run("rm -r " .. quote("./" .. relative))
+  assert(relative_ok, relative_error)
+  local link = root .. "/linked"
+  run("ln -s " .. quote(root .. "/nested") .. " " .. quote(link))
+  names(tab["scan-directory"](link, false, "f"), {})
+  names(tab["scan-directory"](link .. "/", false, "f"), {"two.fnl"})
+  names(tab["scan-directory"](link .. "//", false, "f"), {"two.fnl"})
+  assert(tab["load-folder"](link .. "/").two.value == 2)
+  local substitution = "$(printf " .. root .. "/empty)"
+  fails(function() tab["scan-directory"](substitution) end, substitution)
+  local original_popen = io.popen
+  local invoked = false
+  io.popen = function() invoked = true; error("invalid input reached shell") end
+  for _, value in ipairs({"f; printf injected", "x", "", false, 1}) do
+    assert(not pcall(tab["scan-directory"], root, false, value))
+  end
+  for _, path in ipairs({"", "bad\0path", false, 1}) do
+    assert(not pcall(tab["scan-directory"], path))
+  end
+  io.popen = original_popen
+  assert(not invoked, "invalid inputs must be rejected before process startup")
   local loaded = tab["load-folder"](root, true)
   assert(loaded.one.value == 1 and loaded["nested/two"].value == 2)
   local missing = root .. "/missing"
   fails(function() tab["scan-directory"](missing) end, missing)
   fails(function() tab["load-folder"](missing) end, missing)
+
+  -- Root has no extra separator before its children.
+  local root_popen = io.popen
+  local root_ok, root_error = pcall(function()
+    for _, prefix in ipairs({"/", "///"}) do
+      io.popen = function()
+        return {lines = function()
+          local paths, i = {prefix, prefix .. "tmp"}, 0
+          return function() i = i + 1; return paths[i] end
+        end, close = function() return true, "exit", 0 end}
+      end
+      names(tab["scan-directory"](prefix), {"tmp"})
+    end
+  end)
+  io.popen = root_popen
+  assert(root_ok, root_error)
 
   -- Starting the child can fail before there is a stream to read.
   local popen = io.popen

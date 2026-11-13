@@ -111,14 +111,28 @@
 
 (fn tab.scan-directory [path ?recurse ?type ?strip-ext]
   "Return a list of files & directories at PATH, ?RECURSE-ing if true, limited to Files or Directories if F or D are given as the TYPE, and ?STRIP-EXT if true removes the file extension from the file names in the returned list. Raises an error if find cannot start or exits unsuccessfully; an empty list means a successful empty scan."
+  (assert (and (= (type path) :string)
+               (> (length path) 0)
+               (not (string.find path "%z")))
+          "Directory scan requires a nonempty path without NUL bytes")
+  (assert (or (= ?type nil) (= ?type :f) (= ?type :d))
+          "Directory scan type must be f or d")
+  ;; Quote as a literal shell argument; prefix relative paths so find cannot
+  ;; interpret a leading dash as an expression. Preserve the caller's path.
+  (local scan-path (if (= (string.sub path 1 1) "/") path (.. "./" path)))
+  ;; Keep trailing separators in find's operand: they make a symlink to a
+  ;; directory traversable. find adds a child separator only when absent.
+  (local relative-start (+ (length scan-path)
+                           (if (= (string.sub scan-path -1) "/") 1 2)))
+  (local quoted (: scan-path :gsub "'" "'\\''"))
   (local matches {})
   (local A (tab.make-string-appender))
-  (A ["find \"" path "\""])
+  (A ["find '" quoted "'"])
   (when (not ?recurse) (A " -maxdepth 1"))
   (when ?type (A [" -type " ?type]))
   (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))]
     (each [result _ (results:lines)]
-      (let [line (string.sub result (+ 2 (length path)))]
+      (let [line (string.sub result relative-start)]
         (when (> (length line) 0)
           (table.insert matches (if ?strip-ext
                                     (: line :sub 0 -5)
