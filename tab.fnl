@@ -132,18 +132,36 @@
   (when ?type (A [" -type " ?type]))
   (A " -print0")
   (let [results (assert (io.popen (A)) (.. "Could not start directory scan: " path))
-        output (results:read "*a")
+        (ok err) (pcall
+                   (fn []
+                     ;; Keep only one chunk and the unfinished record in memory.
+                     (var pending "")
+                     (var reading true)
+                     (while reading
+                       (let [(chunk read-error) (results:read 8192)]
+                         (if chunk
+                             (do
+                               (set pending (.. pending chunk))
+                               (var start 1)
+                               (var boundary (string.find pending "\0" start true))
+                               (while boundary
+                                 (let [result (string.sub pending start (- boundary 1))
+                                       line (string.sub result relative-start)]
+                                   (when (> (length line) 0)
+                                     (table.insert matches (if ?strip-ext
+                                                               (: line :sub 0 -5)
+                                                               line))))
+                                 (set start (+ boundary 1))
+                                 (set boundary (string.find pending "\0" start true)))
+                               (set pending (string.sub pending start)))
+                             (do
+                               (assert (not read-error) "Directory scan read failed")
+                               (set reading false)))))
+                     (assert (= pending "") "Incomplete directory scan output")))
         closed (results:close)]
-    ;; Check both read and process completion before exposing any partial names.
-    (assert (and output closed) (.. "Could not scan directory: " path))
-    (assert (or (= output "") (= (string.sub output -1) "\0"))
-            (.. "Incomplete directory scan output: " path))
-    (each [result (string.gmatch output "(.-)%z")]
-      (let [line (string.sub result relative-start)]
-        (when (> (length line) 0)
-          (table.insert matches (if ?strip-ext
-                                    (: line :sub 0 -5)
-                                    line))))))
+    ;; Always close after reading, including parser/read errors. Partial matches
+    ;; stay private unless both reading and the child process succeeded.
+    (assert (and ok closed) (.. "Could not scan directory: " path)))
   matches)
 
 (fn tab.save-file [data path ?force]

@@ -11,6 +11,15 @@ local function write(path, contents)
   assert(file:write(contents))
   assert(file:close())
 end
+-- Model binary numeric reads, including EOF and read failure.
+local function reader(data, failure)
+  return function(_, size)
+    if not data or data == "" then return nil, failure end
+    local chunk = data:sub(1, size)
+    data = data:sub(size + 1)
+    return chunk
+  end
+end
 local function names(actual, expected)
   table.sort(actual)
   table.sort(expected)
@@ -93,7 +102,7 @@ local ok, err = pcall(function()
   for _, output in ipairs({false, root .. "/partial.fnl"}) do
     local was_closed = false
     io.popen = function()
-      return {read = function() return output or nil end,
+      return {read = reader(output or nil, output == false and "read failed" or nil),
         close = function() was_closed = true; return true, "exit", 0 end}
     end
     local accepted = pcall(tab["scan-directory"], root)
@@ -106,13 +115,45 @@ local ok, err = pcall(function()
   local root_ok, root_error = pcall(function()
     for _, prefix in ipairs({"/", "///"}) do
       io.popen = function()
-        return {read = function() return prefix .. "\0" .. prefix .. "tmp\0" end, close = function() return true, "exit", 0 end}
+        return {read = reader(prefix .. "\0" .. prefix .. "tmp\0"), close = function() return true, "exit", 0 end}
       end
       names(tab["scan-directory"](prefix), {"tmp"})
     end
   end)
   io.popen = root_popen
   assert(root_ok, root_error)
+
+  -- Records and separators may cross read boundaries; the final record must
+  -- not be mistaken for EOF merely because it ends at an exact chunk boundary.
+  local chunk_popen = io.popen
+  for _, size in ipairs({8191, 8192, 8193, 16384}) do
+    local name = string.rep("x", size - #root - 3) .. "\n"
+    local data = root .. "/" .. name .. "\0" .. root .. "/last.fnl\0"
+    io.popen = function()
+      return {read = reader(data), close = function() return true, "exit", 0 end}
+    end
+    local checked, failure = pcall(function()
+      names(tab["scan-directory"](root), {name, "last.fnl"})
+    end)
+    io.popen = chunk_popen
+    assert(checked, failure)
+  end
+
+  -- Failure after a complete partial record, and a thrown read error, must
+  -- still close the process without exposing the collected partial names.
+  for _, throws in ipairs({false, true}) do
+    local closed = false
+    local read = reader(root .. "/partial.fnl\0", "read failed")
+    io.popen = function()
+      return {read = function(self, size)
+        if throws then error("read exception") end
+        return read(self, size)
+      end, close = function() closed = true; return true, "exit", 0 end}
+    end
+    local accepted = pcall(tab["scan-directory"], root)
+    io.popen = chunk_popen
+    assert(not accepted and closed)
+  end
 
   -- Starting the child can fail before there is a stream to read.
   local popen = io.popen
@@ -126,7 +167,7 @@ local ok, err = pcall(function()
   local closed = false
   io.popen = function()
     return {
-      read = function() return root .. "/one.fnl\0" end,
+      read = reader(root .. "/one.fnl\0"),
       close = function() closed = true; return nil, "exit", 1 end
     }
   end
