@@ -119,11 +119,11 @@
           "Directory scan type must be f or d")
   ;; Quote as a literal shell argument; prefix relative paths so find cannot
   ;; interpret a leading dash as an expression. Preserve the caller's path.
-  (local normalized (: path :gsub "/+$" ""))
-  (local scan-path (if (= normalized "") "/"
-                      (= (string.sub normalized 1 1) "/") normalized
-                      (.. "./" normalized)))
-  (local relative-start (if (= scan-path "/") 2 (+ 2 (length scan-path))))
+  (local scan-path (if (= (string.sub path 1 1) "/") path (.. "./" path)))
+  ;; Keep trailing separators in find's operand: they make a symlink to a
+  ;; directory traversable. find adds a child separator only when absent.
+  (local relative-start (+ (length scan-path)
+                           (if (= (string.sub scan-path -1) "/") 1 2)))
   (local quoted (: scan-path :gsub "'" "'\\''"))
   (local matches {})
   (local A (tab.make-string-appender))

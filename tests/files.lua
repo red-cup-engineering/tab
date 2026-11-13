@@ -49,6 +49,12 @@ local ok, err = pcall(function()
   end)
   run("rm -r " .. quote("./" .. relative))
   assert(relative_ok, relative_error)
+  local link = root .. "/linked"
+  run("ln -s " .. quote(root .. "/nested") .. " " .. quote(link))
+  names(tab["scan-directory"](link, false, "f"), {})
+  names(tab["scan-directory"](link .. "/", false, "f"), {"two.fnl"})
+  names(tab["scan-directory"](link .. "//", false, "f"), {"two.fnl"})
+  assert(tab["load-folder"](link .. "/").two.value == 2)
   local substitution = "$(printf " .. root .. "/empty)"
   fails(function() tab["scan-directory"](substitution) end, substitution)
   local original_popen = io.popen
@@ -70,15 +76,16 @@ local ok, err = pcall(function()
 
   -- Root has no extra separator before its children.
   local root_popen = io.popen
-  io.popen = function()
-    return {lines = function()
-      local paths, i = {"/", "/tmp"}, 0
-      return function() i = i + 1; return paths[i] end
-    end, close = function() return true, "exit", 0 end}
-  end
   local root_ok, root_error = pcall(function()
-    names(tab["scan-directory"]("/"), {"tmp"})
-    names(tab["scan-directory"]("///"), {"tmp"})
+    for _, prefix in ipairs({"/", "///"}) do
+      io.popen = function()
+        return {lines = function()
+          local paths, i = {prefix, prefix .. "tmp"}, 0
+          return function() i = i + 1; return paths[i] end
+        end, close = function() return true, "exit", 0 end}
+      end
+      names(tab["scan-directory"](prefix), {"tmp"})
+    end
   end)
   io.popen = root_popen
   assert(root_ok, root_error)
