@@ -128,6 +128,8 @@ signs and backticks. The optional type is limited to the documented `f` and
 a process. Scanning uses NUL-delimited `find -print0` output, so embedded
 newlines remain filename data. A read failure, unsuccessful child exit or
 incomplete final record raises an error rather than returning partial names.
+Output is read in 8192-byte chunks, retaining only the unfinished record between
+reads in addition to the returned name list.
 
 ## Research notes
 
