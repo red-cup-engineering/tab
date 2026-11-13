@@ -1,9 +1,18 @@
 ---
 name: engagement-ethics
-description: The ethics of engagement — the compulsion-loop / Skinner-box / dark-pattern literature (variable-ratio reinforcement, Schüll's "machine zone," loot boxes, engagement-vs-well-being) set against an autonomy-supportive, honest-world design ethic, and the POSITION that tab's substrate makes the ethical path structurally natural. The world is a deterministic, inspectable, replayable/forkable log with no hidden state and ⊥ = honest ignorance, so the manipulation mechanisms (hidden RNG, concealed state, dependence-by-design, the player who can't leave) are largely unbuildable on it. FACTS from the critique kept apart from tab PROPOSALS and the stated tab stance.
+status: historical-research-not-implementation
+description: Historical research context, not the current Fennel TAB API. The ethics of engagement — the compulsion-loop / Skinner-box / dark-pattern literature (variable-ratio reinforcement, Schüll's "machine zone," loot boxes, engagement-vs-well-being) set against an autonomy-supportive, honest-world design ethic, and the POSITION that tab's substrate makes the ethical path structurally natural. The world is a deterministic, inspectable, replayable/forkable log with no hidden state and ⊥ = honest ignorance, so the manipulation mechanisms (hidden RNG, concealed state, dependence-by-design, the player who can't leave) are largely unbuildable on it. FACTS from the critique kept apart from tab PROPOSALS and the stated tab stance.
 ---
 
 # The ethics of engagement
+
+> **Status:** Preserved research and design discussion, not an implementation
+> contract for this repository. Present-tense code claims below refer to the
+> historical JavaScript/predication context described in the note, not to the
+> current Fennel TAB source. Proposed economic and evidence mechanisms remain
+> proposals here. See [provenance and scope](README.md) before using these notes
+> as engineering requirements.
+
 
 `player-motivation` reads the *constructive* engagement literature — SDT, flow, Yee, presence — and maps the three needs onto tab morphisms.
 This note reads the *critical* literature: the study of how engagement is manufactured against the player's interest, and the ethical line between *supporting* a need and *exploiting* it.

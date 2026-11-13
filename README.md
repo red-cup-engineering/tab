@@ -127,3 +127,9 @@ signs and backticks. The optional type is limited to the documented `f` and
 `d` values; invalid types and empty/NUL-containing paths fail before starting
 a process. Scanning still uses newline-delimited `find` output: filenames
 containing newlines are not supported by this API.
+
+## Research notes
+
+[Preserved research and design notes](docs/dev/notes/README.md) discuss economic,
+evidence and game-design ideas in a historical JavaScript/predication context.
+They are not the current Fennel API or evidence of implemented economic features.
