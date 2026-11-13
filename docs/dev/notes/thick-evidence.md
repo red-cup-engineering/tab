@@ -1,9 +1,18 @@
 ---
 name: thick-evidence
-description: Evidence is a term, not a bit. tab's cells now optionally carry a WITNESS — the intra-action rows that justify each face — the Curry–Howard "term t:p" made of on-disk, content-addressed rows. The thin presence bits are the degenerate case; `aggregate` is the witness-combining join. Additive and opt-in, so the thin path is unchanged; this is the seat from which voidmath-kernel's settle/charge can be re-adopted.
+status: historical-research-not-implementation
+description: Historical research context, not the current Fennel TAB API. Evidence is a term, not a bit. tab's cells now optionally carry a WITNESS — the intra-action rows that justify each face — the Curry–Howard "term t:p" made of on-disk, content-addressed rows. The thin presence bits are the degenerate case; `aggregate` is the witness-combining join. Additive and opt-in, so the thin path is unchanged; this is the seat from which voidmath-kernel's settle/charge can be re-adopted.
 ---
 
 # Thick evidence
+
+> **Status:** Preserved research and design discussion, not an implementation
+> contract for this repository. Present-tense code claims below refer to the
+> historical JavaScript/predication context described in the note, not to the
+> current Fennel TAB source. Proposed economic and evidence mechanisms remain
+> proposals here. See [provenance and scope](README.md) before using these notes
+> as engineering requirements.
+
 
 The voidmath-kernel evidence-carrier note draws the distinction: **thin** evidence is presence bits `(pos,neg) ∈ {0,1}²` (the mark is the trivial `{const:true}`); **thick** evidence is a real witness term — "evidence for p is a term `t : p`" (Curry–Howard) — and the join *combines* the witnesses (`{allOf:[w1,w2]}`) rather than OR-ing bits. tab began thin (the right floor).
 This note records the first step toward thick, taken additively so nothing thin breaks.

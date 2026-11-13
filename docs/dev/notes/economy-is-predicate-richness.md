@@ -1,9 +1,18 @@
 ---
 name: economy-is-predicate-richness
-description: Value is fiber richness, not an assigned number; trade is fiber exchange (predicates moving between logs); scarcity is settledness; inflation is the tower outrunning settlement. Maps the world-sim's economic layer onto tab's concrete machinery — cells, located-in, the FUNCTIONAL set, the bilattice ⊤ — and marks the one light signal tab would need to make value legible.
+status: historical-research-not-implementation
+description: Historical research context, not the current Fennel TAB API. Value is fiber richness, not an assigned number; trade is fiber exchange (predicates moving between logs); scarcity is settledness; inflation is the tower outrunning settlement. Maps the world-sim's economic layer onto tab's concrete machinery — cells, located-in, the FUNCTIONAL set, the bilattice ⊤ — and marks the one light signal tab would need to make value legible.
 ---
 
 # The economy is predicate richness
+
+> **Status:** Preserved research and design discussion, not an implementation
+> contract for this repository. Present-tense code claims below refer to the
+> historical JavaScript/predication context described in the note, not to the
+> current Fennel TAB source. Proposed economic and evidence mechanisms remain
+> proposals here. See [provenance and scope](README.md) before using these notes
+> as engineering requirements.
+
 
 The predication-world-sim makes a strong claim: there is no separate economy subsystem to bolt onto play.
 "The game economy isn't a designed system bolted onto gameplay — it IS gameplay."

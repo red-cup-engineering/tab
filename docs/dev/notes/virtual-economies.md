@@ -1,9 +1,18 @@
 ---
 name: virtual-economies
-description: What two decades of virtual-economy research (Castronova's Norrath GDP, Lehdonvirta & Castronova's Virtual Economies, EVE's player-driven single shard, mudflation, faucets/sinks, item decay, gold-farming/RMT as attack, comparative advantage) actually found — kept separate from how it maps onto tab's running machinery. The headline: the discipline's hardest-won lesson is that a virtual economy is a faucet/sink flow problem, and tab's needs/resource-depletion loop is a faucet with almost no sinks, while richness-as-value and trade-as-dual-filing already give tab a NATIVE economy the field had to bolt on. Extends economy-is-predicate-richness.md.
+status: historical-research-not-implementation
+description: Historical research context, not the current Fennel TAB API. What two decades of virtual-economy research (Castronova's Norrath GDP, Lehdonvirta & Castronova's Virtual Economies, EVE's player-driven single shard, mudflation, faucets/sinks, item decay, gold-farming/RMT as attack, comparative advantage) actually found — kept separate from how it maps onto tab's running machinery. The headline: the discipline's hardest-won lesson is that a virtual economy is a faucet/sink flow problem, and tab's needs/resource-depletion loop is a faucet with almost no sinks, while richness-as-value and trade-as-dual-filing already give tab a NATIVE economy the field had to bolt on. Extends economy-is-predicate-richness.md.
 ---
 
 # Virtual economies — what the field found, and where tab stands
+
+> **Status:** Preserved research and design discussion, not an implementation
+> contract for this repository. Present-tense code claims below refer to the
+> historical JavaScript/predication context described in the note, not to the
+> current Fennel TAB source. Proposed economic and evidence mechanisms remain
+> proposals here. See [provenance and scope](README.md) before using these notes
+> as engineering requirements.
+
 
 The existing note `economy-is-predicate-richness.md` argues that in tab the economy is not a subsystem: value IS fiber richness, trade IS dual-filed `located-in`, scarcity IS settledness, contested value IS ⊤.
 That note reasons from the predication-world-sim doc and tab's code.
