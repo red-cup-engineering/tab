@@ -1,7 +1,7 @@
 ---
 name: virtual-economies
 status: historical-research-not-implementation
-description: Historical research context, not the current Fennel TAB API. What two decades of virtual-economy research (Castronova's Norrath GDP, Lehdonvirta & Castronova's Virtual Economies, EVE's player-driven single shard, mudflation, faucets/sinks, item decay, gold-farming/RMT as attack, comparative advantage) actually found — kept separate from how it maps onto tab's running machinery. The headline: the discipline's hardest-won lesson is that a virtual economy is a faucet/sink flow problem, and tab's needs/resource-depletion loop is a faucet with almost no sinks, while richness-as-value and trade-as-dual-filing already give tab a NATIVE economy the field had to bolt on. Extends economy-is-predicate-richness.md.
+description: "Historical research context, not the current Fennel TAB API. What two decades of virtual-economy research (Castronova's Norrath GDP, Lehdonvirta & Castronova's Virtual Economies, EVE's player-driven single shard, mudflation, faucets/sinks, item decay, gold-farming/RMT as attack, comparative advantage) actually found — kept separate from how it maps onto tab's running machinery. The headline: the discipline's hardest-won lesson is that a virtual economy is a faucet/sink flow problem, and tab's needs/resource-depletion loop is a faucet with almost no sinks, while richness-as-value and trade-as-dual-filing already give tab a NATIVE economy the field had to bolt on. Extends economy-is-predicate-richness.md."
 ---
 
 # Virtual economies — what the field found, and where tab stands

@@ -1,7 +1,7 @@
 ---
 name: progression-design
 status: historical-research-not-implementation
-description: Historical research context, not the current Fennel TAB API. What game studies and motivation psychology actually found about progression — Juul's progression-vs-emergence, Deci & Ryan's self-determination theory and the overjustification effect (why a visible XP number can HURT), Csikszentmihalyi's flow channel, the treadmill critique, and "meaningful progression" as capability-that-opens-the-world vs numbers-going-up — kept separate from how it maps onto tab. The headline: tab's advancement is a SETTLEMENT/CLOSURE THRESHOLD, not a designed level number, which is structurally the intrinsic kind of progression the research endorses; the risk is bolting an extrinsic XP bar onto it and triggering the overjustification effect the field warns against.
+description: "Historical research context, not the current Fennel TAB API. What game studies and motivation psychology actually found about progression — Juul's progression-vs-emergence, Deci & Ryan's self-determination theory and the overjustification effect (why a visible XP number can HURT), Csikszentmihalyi's flow channel, the treadmill critique, and \"meaningful progression\" as capability-that-opens-the-world vs numbers-going-up — kept separate from how it maps onto tab. The headline: tab's advancement is a SETTLEMENT/CLOSURE THRESHOLD, not a designed level number, which is structurally the intrinsic kind of progression the research endorses; the risk is bolting an extrinsic XP bar onto it and triggering the overjustification effect the field warns against."
 ---
 
 # Progression design — what the research found, and where tab stands
