@@ -254,8 +254,48 @@
 
 ;;; Things
 
+;; Search title overrides first, then the shared engine. Running from the engine
+;; directory without an instance configuration retains TAB's original layout.
+(var search-roots [{:attributes "attributes" :behaviors "behaviors" :commands "commands"}])
+
+(set tab.writable-attributes-root "attributes")
+(local loaders {})
+
+(fn tab.configure [settings]
+  (set search-roots (assert settings.search-roots "TAB requires search roots"))
+  (set tab.writable-attributes-root (or settings.writable-attributes-root "attributes")))
+
+(fn tab.configure-world [world-attributes engine]
+  (fn resource-root [directory]
+    {:attributes (.. directory "/attributes")
+     :behaviors (.. directory "/behaviors")
+     :commands (.. directory "/commands")})
+  (tab.configure {:search-roots [{:attributes world-attributes}
+                                 (resource-root (.. engine "/packages/mudlib"))
+                                 (resource-root engine)]
+                  :writable-attributes-root world-attributes}))
+
+(fn load-resource [kind name]
+  (let [file (tab.find-by search-roots
+               (fn [root]
+                 (when (. root kind)
+                   (io.open (.. (. root kind) "/" name ".fnl") :r))))]
+    (if file
+        (let [source (file:read "*all")]
+          (file:close)
+          ;; Model tables are mutable. Cache the code that constructs a fresh
+          ;; model, and pick up edited source on the next lookup.
+          (let [key (.. kind "/" name)
+                previous (. loaders key)]
+            (when (or (not previous) (not= previous.source source))
+              (tset loaders key {:source source
+                                 :load (fennel.eval (.. "(fn [...]\n" source "\n)")
+                                                    {:filename (.. key ".fnl")})}))
+            ((. loaders key :load))))
+        (tab.log :error (.. "No " kind " resource named " name)))))
+
 (fn tab.lookup-behavior [key behavior-name]
-  (let [behavior-file (tab.load-file (.. :behaviors/ behavior-name))]
+  (let [behavior-file (load-resource :behaviors behavior-name)]
     (if behavior-file
         (. behavior-file key)
         (tab.log :error (.. "Failed to find behavior file" behavior-name)))))
@@ -263,11 +303,10 @@
    (tab.find-by thing.behaviors (partial tab.lookup-behavior key)))
 
 (fn tab.lookup-command [command]
-  (tab.load-file (.. :commands/ command)))
+  (load-resource :commands command))
 
 (fn tab.load-attributes-file [attr-path]
-  (tab.load-file (.. :attributes
-                      :/ attr-path)))
+  (load-resource :attributes attr-path))
 
 (fn tab.clone-attributes-from-file [attr-path]
   (collect [k v (pairs (tab.load-attributes-file attr-path))] k v))

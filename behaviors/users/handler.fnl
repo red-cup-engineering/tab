@@ -7,7 +7,7 @@
   (if handler.users-folder
       (do
         (tab.log :debug "Loading " (handler:fname))
-        (set handler.users (tab.load-folder (.. :attributes/ handler.users-folder)))
+        (set handler.users (tab.load-folder (.. tab.writable-attributes-root "/" handler.users-folder)))
         (tab.log :info "Loaded " (handler:fname)
                  " with " (length (tab.collect-keys handler.users)) " users")
         (set handler.loaded? true))
@@ -36,7 +36,7 @@
                            :system-relationships
                            (or handler.default-system-relationships
                                {})}]
-             (tab.save-file new-user (.. :attributes/
+             (tab.save-file new-user (.. tab.writable-attributes-root "/"
                                          handler.users-folder :/ id))
              (tab.log :debug "Saved new user " id " with passcode "
                       new-user.user-passcode)

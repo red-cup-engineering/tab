@@ -2,7 +2,6 @@
 
 (local tab (require :tab))
 (local socket (require :socket))
-(local fennel (require :fennel))
 
 (local mud-server-behaviors {})
 
@@ -12,12 +11,14 @@
   (let [client (tab.make-thing server.mud-client-model
                                {: connection : server
                                 :dimension server.dimension})]
+    (when server.guest-commands
+      (set client.command-list server.guest-commands))
     (table.insert server.clients client)
     (client:message
      (.. "Your connection to " (server:fname) " has been accepted.\n"
          (server:describe) "\n"
          (server.dimension:describe) "\n"))
-    (client:parse "help")
+    (client:parse (if (tab.find-element client.command-list :help) "help" "commands"))
     (when (and client.dimension.map
                client.dimension.map.start-area)
       (client:move
@@ -27,6 +28,7 @@
 (fn mud-server-behaviors.disconnect-client [server client]
   (tab.log :info (.. (server:fname) " disconnecting " (client:fname)))
   (client:message (.. "Disconnecting you now; goodbye!"))
+  (when client.location (client.location:remove-object client))
   (client.connection:close)
   (tab.remove-value server.clients client))
 
@@ -42,7 +44,7 @@
         (local port (or server.port 4242))
         (tab.log :debug (.. "Starting " server.name
                                       " on port " port))
-        (set server.socket (assert (socket.bind "0.0.0.0" port)))
+        (set server.socket (assert (socket.bind (or server.host "0.0.0.0") port)))
         (server.socket:settimeout (or server.timeout 0.001))
         (server.dimension.timer:schedule
           (partial server.tick server true))
@@ -58,10 +60,11 @@
       (server:accept-connection new-conn)))
   (each [_ client (pairs server.clients)]
     (var inputted? nil)
-    (match (client.connection:receive)
-      (_ "timeout") nil
+    (match (client.connection:receive "*l" client.partial-input)
+      (_ "timeout" partial-line) (set client.partial-input partial-line)
       (_ err) (server:disconnect-client client err)
-      input (do (client:parse input)
+      input (do (set client.partial-input nil)
+                (client:parse input)
                 (set client.input-ready? true)))
     (when (not (= (length client.buffer) 0))
       ;; strip extra newlines from the end of output here? seems better than trying to avoid them accruing lol

@@ -1,0 +1,18 @@
+;;;; Run the authored socket service with TAB's timer and ordinary VR player.
+(local player (require :world-player))
+(local dimension (player.load-world))
+(local server (assert dimension.mud-server "The dimension requires an authored MUD server"))
+(set dimension.timer (dimension:make-thing :sys/timer))
+(set server.host "127.0.0.1")
+(local requested-port (os.getenv "TAB_PORT"))
+(when requested-port
+  (local port (assert (tonumber requested-port) "TAB_PORT must be an integer"))
+  (assert (and (<= 0 port 65535) (= (% port 1) 0)) "TAB_PORT must be an integer from 0 to 65535")
+  (set server.port port))
+(set server.mud-client-model player.model)
+(set server.guest-commands player.commands)
+(dimension:start)
+(local (host port) (server.socket:getsockname))
+(print (.. "TAB listening on " host ":" port))
+(io.flush)
+(dimension:run)
