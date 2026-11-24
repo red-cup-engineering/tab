@@ -1,0 +1,15 @@
+name: Source tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.4
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - name: Test filesystem and MUD data loading
+        run: make test LUA=lua5.4
